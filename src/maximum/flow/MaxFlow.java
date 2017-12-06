@@ -30,7 +30,7 @@ public class MaxFlow {
         int parent[] = new int[V];
  
         // Enquanto houver caminho do 's' para o 't'
-        while (BFS.bfs(Graph_r, s, t, parent)){
+        while (Search.bfs(Graph_r, s, t, parent)){
 
             // Encontrando a menor capacidade residual
             int fluxo_caminho = Integer.MAX_VALUE;

@@ -12,7 +12,7 @@ import static maximum.flow.MaxFlow.V;
  *
  * @author Daniel
  */
-public class BFS {
+public class Search {
 
     /* Retorna verdadeiro se houver um caminho de origem 'para afundar' t 'no gráfico residual.
     Também preenche o pai [] para armazenar o caminho */
