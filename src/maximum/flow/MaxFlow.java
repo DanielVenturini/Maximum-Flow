@@ -6,6 +6,7 @@
 package maximum.flow;
 
 import java.util.LinkedList;
+import java.util.Stack;
 /**
  *
  * @author Daniel
@@ -13,99 +14,79 @@ import java.util.LinkedList;
 public class MaxFlow {
 
     static final int V = 6; //Number of vertices in graph
+
+    /* Retorna verdadeiro se houver um caminho de origem 'para afundar' t 'no gráfico residual.
+    Também preenche o pai [] para armazenar o caminho */
+    boolean bfs(int[][] Graph_r, int s, int t, int[] pai) {
+
+        // crie um array de visitados e marque todos os vertices como nao visitado
+        boolean[] visitado = new boolean[V];
+        for(int i = 0; i < V; i ++)
+            visitado[i] = false;
  
-    /* Returns true if there is a path from source 's' to sink
-      't' in residual graph. Also fills parent[] to store the
-      path */
-    boolean bfs(int rGraph[][], int s, int t, int parent[])
-    {
-        // Create a visited array and mark all vertices as not
-        // visited
-        boolean visited[] = new boolean[V];
-        for(int i=0; i<V; ++i)
-            visited[i]=false;
+        // crie uma pilha, empilhado o vertice de origem e marcando como visitado
+        Stack<Integer> queue = new Stack<>();
+        queue.push(s);
+        visitado[s] = true;
+        pai[s] = -1;
  
-        // Create a queue, enqueue source vertex and mark
-        // source vertex as visited
-        LinkedList<Integer> queue = new LinkedList<Integer>();
-        queue.add(s);
-        visited[s] = true;
-        parent[s]=-1;
- 
-        // Standard BFS Loop
-        while (queue.size()!=0)
-        {
-            int u = queue.poll();
- 
-            for (int v=0; v<V; v++)
-            {
-                if (visited[v]==false && rGraph[u][v] > 0)
-                {
-                    queue.add(v);
-                    parent[v] = u;
-                    visited[v] = true;
+        // enquanto houver vertices
+        while (!queue.isEmpty()){
+
+            int u = queue.pop();
+            for (int v = 0; v < V; v ++){
+
+                if (visitado[v] == false && Graph_r[u][v] > 0){
+                    queue.push(v);
+                    pai[v] = u;
+                    visitado[v] = true;
                 }
             }
         }
  
-        // If we reached sink in BFS starting from source, then
-        // return true, else false
-        return (visited[t] == true);
+        // se foi atingido o vertice 't' a partir da fonte, entao retorna true, pois tem caminho
+        return (visitado[t] == true);
     }
 
-// Returns tne maximum flow from s to t in the given graph
-    int fordFulkerson(int graph[][], int s, int t)
-    {
+    int fordFulkerson(int graph[][], int s, int t){
+
         int u, v;
+        int fluxo_maximo = 0;
  
-        // Create a residual graph and fill the residual graph
-        // with given capacities in the original graph as
-        // residual capacities in residual graph
- 
-        // Residual graph where rGraph[i][j] indicates
-        // residual capacity of edge from i to j (if there
-        // is an edge. If rGraph[i][j] is 0, then there is
-        // not)
-        int rGraph[][] = new int[V][V];
+        /* Grafo residual onde Graph_r[i][j] indica a capacidade residual da aresta de i para j.
+        */
+
+        int[][] Graph_r = new int[V][V];
  
         for (u = 0; u < V; u++)
             for (v = 0; v < V; v++)
-                rGraph[u][v] = graph[u][v];
+                Graph_r[u][v] = graph[u][v];
  
-        // This array is filled by BFS and to store path
+        // Este vetor eh preenchido pelo BFS e armazena o caminho
         int parent[] = new int[V];
  
-        int max_flow = 0;  // There is no flow initially
- 
-        // Augment the flow while tere is path from source
-        // to sink
-        while (bfs(rGraph, s, t, parent))
-        {
-            // Find minimum residual capacity of the edhes
-            // along the path filled by BFS. Or we can say
-            // find the maximum flow through the path found.
-            int path_flow = Integer.MAX_VALUE;
-            for (v=t; v!=s; v=parent[v])
-            {
+        // Enquanto houver caminho do 's' para o 't'
+        while (bfs(Graph_r, s, t, parent)){
+
+            // Encontrando a menor capacidade residual
+            int fluxo_caminho = Integer.MAX_VALUE;
+            for (v = t; v != s; v = parent[v]){
                 u = parent[v];
-                path_flow = Math.min(path_flow, rGraph[u][v]);
+                fluxo_caminho = Math.min(fluxo_caminho, Graph_r[u][v]);
             }
  
-            // update residual capacities of the edges and
-            // reverse edges along the path
-            for (v=t; v != s; v=parent[v])
-            {
+            //Atualizando a menor capacidade
+            for (v = t; v != s; v = parent[v]){
                 u = parent[v];
-                rGraph[u][v] -= path_flow;
-                rGraph[v][u] += path_flow;
+                Graph_r[u][v] -= fluxo_caminho;
+                Graph_r[v][u] += fluxo_caminho;
             }
  
-            // Add path flow to overall flow
-            max_flow += path_flow;
+            // Adicionando o fluxo do caminho ao fluxo geral
+            fluxo_maximo += fluxo_caminho;
         }
  
-        // Return the overall flow
-        return max_flow;
+        return fluxo_maximo;
     }
 
 }
